@@ -31,6 +31,8 @@
 
 #include "../../file_formats/file_formats.h"
 
+#include "../../common_features/util.h"
+
 static long currentEventArrayID=0;
 static bool lockSetEventSettings=false;
 
@@ -47,7 +49,7 @@ void MainWindow::setEventsBox()
     int WinType = activeChildWindow();
     QListWidgetItem * item;
 
-    ui->LVLEvents_List->clear();
+    util::memclear(ui->LVLEvents_List);
 
     if (WinType==1)
     {
@@ -75,6 +77,11 @@ void MainWindow::EventListsSync()
     ui->ItemProperties->hide();
     LvlItemPropsLock=true;
     lockSetEventSettings=true;
+
+    QString curDestroyedBlock = ui->Find_Combo_EventDestoryedBlock->currentText();
+    QString curHitedBlock = ui->Find_Combo_EventHitedBlock->currentText();
+    QString curLayerEmptyBlock = ui->Find_Combo_EventLayerEmptyBlock->currentText();
+
     int WinType = activeChildWindow();
 
     ui->PROPS_BlkEventDestroy->clear();
@@ -98,6 +105,9 @@ void MainWindow::EventListsSync()
     ui->PROPS_NpcEventEmptyLayer->addItem(noEvent);
     ui->LVLEvent_TriggerEvent->addItem(noEvent);
 
+    ui->Find_Combo_EventDestoryedBlock->clear();
+    ui->Find_Combo_EventHitedBlock->clear();
+    ui->Find_Combo_EventLayerEmptyBlock->clear();
 
     if (WinType==1)
     {
@@ -112,11 +122,19 @@ void MainWindow::EventListsSync()
             ui->PROPS_NpcEventTalk->addItem(event.name);
             ui->PROPS_NpcEventEmptyLayer->addItem(event.name);
             ui->LVLEvent_TriggerEvent->addItem(event.name);
+
+            ui->Find_Combo_EventDestoryedBlock->addItem(event.name);
+            ui->Find_Combo_EventHitedBlock->addItem(event.name);
+            ui->Find_Combo_EventLayerEmptyBlock->addItem(event.name);
         }
     }
     //LvlItemPropsLock = false; - must be true always
-    lockSetEventSettings=false;
 
+    ui->Find_Combo_EventDestoryedBlock->setCurrentText(curDestroyedBlock);
+    ui->Find_Combo_EventHitedBlock->setCurrentText(curHitedBlock);
+    ui->Find_Combo_EventLayerEmptyBlock->setCurrentText(curLayerEmptyBlock);
+
+    lockSetEventSettings=false;
 }
 
 void MainWindow::setSoundList()
@@ -407,10 +425,10 @@ void MainWindow::eventLayerVisiblySyncList()
 
         LevelEvents event = edit->LvlData.events[i];
 
-        ui->LVLEvents_layerList->clear();
-        ui->LVLEvent_Layer_HideList->clear();
-        ui->LVLEvent_Layer_ShowList->clear();
-        ui->LVLEvent_Layer_ToggleList->clear();
+        util::memclear(ui->LVLEvents_layerList);
+        util::memclear(ui->LVLEvent_Layer_HideList);
+        util::memclear(ui->LVLEvent_Layer_ShowList);
+        util::memclear(ui->LVLEvent_Layer_ToggleList);
 
         QListWidgetItem * item;
         //Total layers list

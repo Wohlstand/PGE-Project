@@ -33,6 +33,9 @@ void MainWindow::on_actionLevelProp_triggered()
             lvlsetData.push_back(LevProps.LevelTitle);
             activeLvlEditWin()->scene->addChangeLevelSettingsHistory(LvlScene::SETTING_LEVELNAME, QVariant(lvlsetData));
             activeLvlEditWin()->LvlData.LevelName = LevProps.LevelTitle;
+            activeLvlEditWin()->LvlData.modified = true;
+            activeLvlEditWin()->setWindowTitle( LevProps.LevelTitle.isEmpty() ? activeLvlEditWin()->userFriendlyCurrentFile() : LevProps.LevelTitle );
+            updateWindowMenu();
         }
     }
 
@@ -96,6 +99,18 @@ void MainWindow::on_actionLevelEvents_triggered(bool checked)
     ui->LevelEventsToolBox->setVisible(checked);
     if(checked) ui->LevelEventsToolBox->raise();
 }
+
+void MainWindow::on_FindDock_visibilityChanged(bool visible)
+{
+    ui->actionLVLSearchBox->setChecked(visible);
+}
+
+void MainWindow::on_actionLVLSearchBox_triggered(bool checked)
+{
+    ui->FindDock->setVisible(checked);
+    if(checked) ui->FindDock->raise();
+}
+
 
 
 

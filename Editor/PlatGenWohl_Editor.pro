@@ -27,6 +27,9 @@ QT       += core gui widgets multimedia opengl
 TARGET = pge_editor
 TEMPLATE = app
 
+#CONFIG += c++11
+#QMAKE_CXXFLAGS += -std=c++11
+
 # CONFIG += static
 
 TRANSLATIONS += languages/editor_en.ts \
@@ -36,7 +39,9 @@ TRANSLATIONS += languages/editor_en.ts \
     languages/editor_es.ts \
     languages/editor_nl.ts \
     languages/editor_it.ts \
-    languages/editor_fr.ts
+    languages/editor_fr.ts \
+    languages/editor_pt.ts \
+    languages/editor_ja.ts
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -115,7 +120,11 @@ SOURCES += main.cpp\
     data_configs/configstatus.cpp \
     common_features/graphics_funcs.cpp \
     common_features/levelfilelist.cpp \
-    libs/EasyBMP/EasyBMP.cpp
+    libs/EasyBMP/EasyBMP.cpp \
+    item_select_dialog/itemselectdialog.cpp \
+    common_features/simple_animator.cpp \
+    main_window/dock/lvl_search_toolbox.cpp \
+    common_features/util.cpp
 
 HEADERS  += mainwindow.h \
     file_formats/file_formats.h \
@@ -158,7 +167,10 @@ HEADERS  += mainwindow.h \
     libs/EasyBMP/EasyBMP.h \
     libs/EasyBMP/EasyBMP_BMP.h \
     libs/EasyBMP/EasyBMP_DataStructures.h \
-    libs/EasyBMP/EasyBMP_VariousBMPutilities.h
+    libs/EasyBMP/EasyBMP_VariousBMPutilities.h \
+    item_select_dialog/itemselectdialog.h \
+    common_features/simple_animator.h \
+    common_features/util.h
 
 FORMS    += \
     mainwindow.ui \
@@ -173,7 +185,8 @@ FORMS    += \
     edit_npc/npcedit.ui \
     about_dialog/aboutdialog.ui \
     data_configs/configstatus.ui \
-    common_features/levelfilelist.ui
+    common_features/levelfilelist.ui \
+    item_select_dialog/itemselectdialog.ui
 
 RC_FILE = _resources/pge_editor.rc
 

@@ -249,7 +249,9 @@ void LvlScene::selectionChanged()
         MainWinConnect::pMainWin->LvlItemProps(-1, dummyBlock, dummyBgo, dummyNPC);
     }
 
+    #ifdef _DEBUG_
     WriteToLog(QtDebugMsg, "Selection Changed!");
+    #endif
 }
 
 void LvlScene::doorPointsSync(long arrayID, bool remove)
@@ -323,8 +325,10 @@ static QPointF drawStartPos = QPoint(0,0);
 
 void LvlScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    #ifdef _DEBUG_
     WriteToLog(QtDebugMsg, QString("Mouse pressed -> [%1, %2] contextMenuOpened=%3, DrawMode=%4").arg(mouseEvent->scenePos().x()).arg(mouseEvent->scenePos().y())
                .arg(contextMenuOpened).arg(DrawMode));
+    #endif
 
 if(contextMenuOpened) return;
 
@@ -339,7 +343,9 @@ if(contextMenuOpened) return;
             }
 
             if(cursor){
-                cursor->setPos( QPointF(applyGrid( mouseEvent->scenePos().toPoint(),
+                cursor->setPos( QPointF(applyGrid( mouseEvent->scenePos().toPoint()-
+                                                   QPoint(LvlPlacingItems::c_offset_x,
+                                                          LvlPlacingItems::c_offset_y),
                                                    LvlPlacingItems::gridSz,
                                                    LvlPlacingItems::gridOffset)));
             }
@@ -442,7 +448,9 @@ void LvlScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
             this->clearSelection();
             if(cursor)
             {
-                        cursor->setPos( QPointF(applyGrid( mouseEvent->scenePos().toPoint(),
+                        cursor->setPos( QPointF(applyGrid( mouseEvent->scenePos().toPoint()-
+                                                           QPoint(LvlPlacingItems::c_offset_x,
+                                                                  LvlPlacingItems::c_offset_y),
                                                          LvlPlacingItems::gridSz,
                                                          LvlPlacingItems::gridOffset)));
                        cursor->show();
@@ -599,8 +607,8 @@ void LvlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                         {
                             addPlaceHistory(plSqBlock);
                             //restart Animation
-                            if(opts.animationEnabled) stopAnimation();
-                            if(opts.animationEnabled) startBlockAnimation();
+                            //if(opts.animationEnabled) stopAnimation();
+                            //if(opts.animationEnabled) startBlockAnimation();
 
                         }
                     }
@@ -634,9 +642,6 @@ void LvlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                     {
                         addPlaceHistory(plSqBgo);
                         //restart Animation
-                        if(opts.animationEnabled) stopAnimation();
-                        if(opts.animationEnabled) startBlockAnimation();
-
                     }
                 }
             }
@@ -782,7 +787,9 @@ void LvlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                     {
                         ///SKIP NON-MOVED ITEMS
                         IsMoved=false;
+                        #ifdef _DEBUG_
                         WriteToLog(QtDebugMsg, QString(" >>Collision skiped, posSource=posCurrent"));
+                        #endif
                         continue;
                     }
 
@@ -822,7 +829,9 @@ void LvlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                 { ////////////////////////SECOND FETCH///////////////////////
                     ObjType = (*it)->data(0).toString();
 
+                    #ifdef _DEBUG_
                     WriteToLog(QtDebugMsg, QString(" >>Check collision with \"%1\"").arg(ObjType));
+                    #endif
 
                     setItemSourceData((*it), ObjType); //Set Grid Size/Offset, sourcePosition
 
@@ -831,7 +840,9 @@ void LvlScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                     {
                         ///SKIP NON-MOVED ITEMS
                         IsMoved=false;
+                        #ifdef _DEBUG_
                         WriteToLog(QtDebugMsg, QString(" >>Collision skiped, posSource=posCurrent"));
+                        #endif
                         continue;
                     }
 
@@ -1103,6 +1114,9 @@ void LvlScene::placeItemUnderCursor()
 
             newData.npc.push_back(LvlPlacingItems::npcSet);
 
+            if(opts.animationEnabled) stopAnimation();
+            if(opts.animationEnabled) startBlockAnimation();
+
             wasPlaced=true;
         }
         else
@@ -1186,8 +1200,8 @@ void LvlScene::placeItemUnderCursor()
         addPlaceHistory(newData);
     }
 
-    if(opts.animationEnabled) stopAnimation();
-    if(opts.animationEnabled) startBlockAnimation();
+    //if(opts.animationEnabled) stopAnimation();
+    //if(opts.animationEnabled) startBlockAnimation();
 }
 
 
@@ -1331,7 +1345,9 @@ void LvlScene::setSectionResizer(bool enabled, bool accept)
         {
             if(accept)
             {
+                #ifdef _DEBUG_
                 WriteToLog(QtDebugMsg, QString("SECTION RESIZE -> to %1 x %2").arg(pResizer->_width).arg(pResizer->_height));
+                #endif
                 long l = pResizer->pos().x();
                 long t = pResizer->pos().y();
                 long r = l+pResizer->_width;
@@ -1389,7 +1405,9 @@ void LvlScene::setEventSctSizeResizer(long event, bool enabled, bool accept)
         {
             if(accept)
             {
+                #ifdef _DEBUG_
                 WriteToLog(QtDebugMsg, QString("SECTION RESIZE -> to %1 x %2").arg(pResizer->_width).arg(pResizer->_height));
+                #endif
                 long l = pResizer->pos().x();
                 long t = pResizer->pos().y();
                 long r = l+pResizer->_width;
@@ -1457,7 +1475,9 @@ void LvlScene::setBlockResizer(QGraphicsItem * targetBlock, bool enabled, bool a
         {
             if(accept)
             {
+                #ifdef _DEBUG_
                 WriteToLog(QtDebugMsg, QString("BLOCK RESIZE -> to %1 x %2").arg(pResizer->_width).arg(pResizer->_height));
+                #endif
                 long x = pResizer->pos().x();
                 long y = pResizer->pos().y();
                 long w = pResizer->_width;

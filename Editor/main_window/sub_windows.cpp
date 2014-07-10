@@ -136,10 +136,28 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 
 void MainWindow::SWCascade()
 {
+    if(GlobalSettings::MainWindowView!=QMdiArea::SubWindowView)
+        setSubView(); // Switch into SubWindow mode on call this menuitem
     ui->centralWidget->cascadeSubWindows();
 }
 
 void MainWindow::SWTile()
 {
+    if(GlobalSettings::MainWindowView!=QMdiArea::SubWindowView)
+        setSubView(); // Switch into SubWindow mode on call this menuitem
     ui->centralWidget->tileSubWindows();
+}
+
+void MainWindow::setSubView()
+{
+    GlobalSettings::MainWindowView = QMdiArea::SubWindowView;
+    ui->centralWidget->setViewMode(GlobalSettings::MainWindowView);
+    updateWindowMenu();
+}
+
+void MainWindow::setTabView()
+{
+    GlobalSettings::MainWindowView = QMdiArea::TabbedView;
+    ui->centralWidget->setViewMode(GlobalSettings::MainWindowView);
+    updateWindowMenu();
 }

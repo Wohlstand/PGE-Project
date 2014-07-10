@@ -38,6 +38,9 @@ ItemNPC::ItemNPC(bool noScene, QGraphicsPixmapItem *parent)
     curDirect = -1;
     frameStep = 1;
     gridSize = 1;
+    frameSize=1;
+
+    CurrentFrame=0;
 
     imgOffsetX=0;
     imgOffsetY=0;
@@ -54,7 +57,9 @@ ItemNPC::ItemNPC(bool noScene, QGraphicsPixmapItem *parent)
 
 ItemNPC::~ItemNPC()
 {
- //   WriteToLog(QtDebugMsg, "!<-Block destroyed->!");
+    //WriteToLog(QtDebugMsg, "!<-NPC destroyed->!");
+    if(includedNPC!=NULL) delete includedNPC;
+    if(grp!=NULL) delete grp;
     if(timer) delete timer;
 }
 
@@ -104,9 +109,11 @@ void ItemNPC::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
 
         QAction *setLayer;
         QList<QAction *> layerItems;
+        LayerName->deleteLater();
 
         QAction * newLayer = LayerName->addAction(tr("Add to new layer..."));
-        LayerName->addSeparator();
+        newLayer->deleteLater();
+        LayerName->addSeparator()->deleteLater();
 
         foreach(LevelLayers layer, scene->LvlData->layers)
         {
@@ -118,56 +125,71 @@ void ItemNPC::contextMenuEvent( QGraphicsSceneContextMenuEvent * event )
             setLayer->setCheckable(true);
             setLayer->setEnabled(true);
             setLayer->setChecked( layer.name==npcData.layer );
+            setLayer->deleteLater();
             layerItems.push_back(setLayer);
         }
 
-        ItemMenu->addSeparator();
+        ItemMenu->addSeparator()->deleteLater();
+        QAction *newNPC = ItemMenu->addAction(tr("New NPC-Configuration"));
+        newNPC->deleteLater();
+        ItemMenu->addSeparator()->deleteLater();
 
         QMenu * chDir = ItemMenu->addMenu(
                     tr("Set %1").arg(
                     (localProps.direct_alt_title!="") ?
                         localProps.direct_alt_title : tr("Direction") ) );
+        chDir->deleteLater();
 
         QAction *setLeft = chDir->addAction( (localProps.direct_alt_left!="") ? localProps.direct_alt_left : tr("Left"));
             setLeft->setCheckable(true);
             setLeft->setChecked(npcData.direct==-1);
+            setLeft->deleteLater();
 
         QAction *setRand = chDir->addAction(tr("Random"));
             setRand->setVisible( !localProps.direct_disable_random );
             setRand->setCheckable(true);
             setRand->setChecked(npcData.direct==0);
+            setRand->deleteLater();
 
         QAction *setRight = chDir->addAction( (localProps.direct_alt_right!="") ? localProps.direct_alt_right : tr("Right") );
             setRight->setCheckable(true);
             setRight->setChecked(npcData.direct==1);
+            setRight->deleteLater();
 
-        ItemMenu->addSeparator();
+        ItemMenu->addSeparator()->deleteLater();;
 
         QAction *fri = ItemMenu->addAction(tr("Friendly"));
             fri->setCheckable(1);
             fri->setChecked( npcData.friendly );
+            fri->deleteLater();
 
         QAction *stat = ItemMenu->addAction(tr("Not movable"));
             stat->setCheckable(1);
             stat->setChecked( npcData.nomove );
+            stat->deleteLater();
 
 
         QAction *msg = ItemMenu->addAction(tr("Set message..."));
+            msg->deleteLater();
 
-        ItemMenu->addSeparator();
+        ItemMenu->addSeparator()->deleteLater();;
 
         QAction *boss = ItemMenu->addAction(tr("Set as Boss"));
             boss->setCheckable(1);
             boss->setChecked( npcData.legacyboss );
 
-        ItemMenu->addSeparator();
+        ItemMenu->addSeparator()->deleteLater();;
 
         QAction *copyNpc = ItemMenu->addAction(tr("Copy"));
+            copyNpc->deleteLater();
         QAction *cutNpc = ItemMenu->addAction(tr("Cut"));
-        ItemMenu->addSeparator();
+            cutNpc->deleteLater();
+        ItemMenu->addSeparator()->deleteLater();;
         QAction *remove = ItemMenu->addAction(tr("Remove"));
-        ItemMenu->addSeparator();
+            remove->deleteLater();
+        ItemMenu->addSeparator()->deleteLater();;
         QAction *props = ItemMenu->addAction(tr("Properties..."));
+            props->deleteLater();
 
         scene->contextMenuOpened = true; //bug protector
 QAction *selected = ItemMenu->exec(event->screenPos());
@@ -192,6 +214,12 @@ QAction *selected = ItemMenu->exec(event->screenPos());
             //scene->doCopy = true ;
             MainWinConnect::pMainWin->on_actionCopy_triggered();
             scene->contextMenuOpened = false;
+        }
+        else
+        if(selected==newNPC){
+            npcedit *child = MainWinConnect::pMainWin->createNPCChild();
+            child->newFile(npcData.id);
+            child->show();
         }
         else
         if(selected==fri)
@@ -247,6 +275,7 @@ QAction *selected = ItemMenu->exec(event->screenPos());
                     }
                     scene->addChangeSettingsHistory(selData, LvlScene::SETTING_MESSAGE, QVariant(msgBox->currentText));
                 }
+                delete msgBox;
                 scene->contextMenuOpened = false;
             }
             else
@@ -361,6 +390,7 @@ QAction *selected = ItemMenu->exec(event->screenPos());
                     MainWinConnect::pMainWin->setLayersBox();
                     MainWinConnect::pMainWin->setLayerToolsLocked(false);
                 }
+                delete layerBox;
             }
             else
             foreach(QAction * lItem, layerItems)
@@ -440,6 +470,8 @@ void ItemNPC::changeDirection(int dir)
 {
     npcData.direct = dir;
 
+    //AnimationStop();
+
     setAnimation(localProps.frames, localProps.framespeed, localProps.framestyle, dir,
     localProps.custom_animate,
         localProps.custom_ani_fl,
@@ -447,7 +479,6 @@ void ItemNPC::changeDirection(int dir)
         localProps.custom_ani_fr,
         localProps.custom_ani_er,
     true);
-
     arrayApply();
 }
 
@@ -460,7 +491,7 @@ void ItemNPC::setIncludedNPC(int npcID, bool init)
     {
         grp->removeFromGroup(includedNPC);
         scene->removeItem(includedNPC);
-        free(includedNPC);
+        delete includedNPC;
         includedNPC = NULL;
     }
     if(npcID==0)
@@ -723,14 +754,17 @@ void ItemNPC::setAnimation(int frames, int framespeed, int framestyle, int direc
     custom_frameFR = frFR;//first right
     custom_frameER = frER;//enf right
 
+    bool refreshFrames = false;
+    if(localProps.gfx_h!=frameSize) refreshFrames = true;
+
     frameSize = localProps.gfx_h;
 
     frameWidth = localProps.gfx_w;
 
     frameHeight = mainImage.height();
 
-    framePos = QPoint(0,0);
-    draw();
+    //framePos = QPoint(0,0);
+    //draw();
 
     int dir=direction;
 
@@ -823,8 +857,6 @@ void ItemNPC::setAnimation(int frames, int framespeed, int framestyle, int direc
     curDirect  = dir;
     setOffset(imgOffsetX+(-((double)localProps.gfx_offset_x)*curDirect), imgOffsetY );
 
-    setFrame(frameFirst);
-
     if(!edit)
     {
         if(timer) delete timer;
@@ -834,11 +866,26 @@ void ItemNPC::setAnimation(int frames, int framespeed, int framestyle, int direc
                     this,
                     SLOT( nextFrame() ) );
     }
+
+    if(refreshFrames) createAnimationFrames();
+
+    setFrame(frameFirst);
+}
+
+void ItemNPC::createAnimationFrames()
+{
+    frames.clear();
+    for(int i=0; (frameSize*i <= frameHeight); i++)
+    {
+        frames.push_back( mainImage.copy(QRect(framePos.x(), frameSize*i, frameWidth, frameSize )) );
+    }
 }
 
 void ItemNPC::AnimationStart()
 {
     if(!animated) return;
+    if((frameLast>0)&&((frameLast-frameFirst)<=0)) return; //Don't start singleFrame animation
+
     timer->start(frameSpeed);
 }
 
@@ -851,7 +898,7 @@ void ItemNPC::AnimationStop()
 
 void ItemNPC::draw()
 {
-    currentImage =  mainImage.copy(QRect(framePos.x(), framePos.y(), frameWidth, frameSize ));
+    //currentImage =  mainImage.copy(QRect(framePos.x(), framePos.y(), frameWidth, frameSize ));
 }
 
 QPoint ItemNPC::fPos() const
@@ -861,17 +908,14 @@ QPoint ItemNPC::fPos() const
 
 void ItemNPC::setFrame(int y)
 {
-    frameCurrent = frameSize * y;
-    if ( ((frameCurrent >= frameHeight )&&(frameLast==-1)) ||
-         ((frameCurrent >= frameLast*frameSize )&&(frameLast>-1)) )
-        {
-        frameCurrent = frameFirst*frameSize;
-        framePos.setY( frameFirst * frameSize );
-        }
-    else
-        framePos.setY( frameCurrent );
-    draw();
-    this->setPixmap(QPixmap(currentImage));
+    if(frames.isEmpty()) return;
+    //frameCurrent = frameSize * y;
+    CurrentFrame = y;
+    //Out of range protection
+    if( CurrentFrame >= frames.size()) CurrentFrame = (frameFirst<frames.size()) ? frameFirst : 0;
+    if( CurrentFrame < frameFirst) CurrentFrame = (frameLast<0)? frames.size()-1 : frameLast;
+
+    this->setPixmap(frames[CurrentFrame]);
 }
 
 void ItemNPC::setLocked(bool lock)
@@ -886,46 +930,47 @@ void ItemNPC::nextFrame()
 
     if(!aniDirect)
     {
-    frameCurrent += frameSize * frameStep;
+        //frameCurrent += frameSize * frameStep;
+        CurrentFrame += frameStep;
 
-    if ( ((frameCurrent >= frameHeight )&&(frameLast==-1)) ||
-         ((frameCurrent > frameLast*frameSize )&&(frameLast>-1)) )
-        {
-            if(!aniBiDirect)
-            {
-            frameCurrent = frameFirst * frameSize;
-            framePos.setY( frameFirst * frameSize );
-            } else
-            {
-            frameCurrent -= frameSize*frameStep*2;
-            framePos.setY( framePos.y() - frameSize*frameStep );
-            aniDirect=!aniDirect;
-            }
-        }
-    else
-        framePos.setY( framePos.y() + frameSize*frameStep );
-    }
-    else
-    {
-        frameCurrent -= frameSize * frameStep;
-
-        if (frameCurrent < (frameFirst*frameSize) )
+        if ( ((CurrentFrame >= frames.size()-(frameStep-1) )&&(frameLast<=-1)) ||
+             ((CurrentFrame > frameLast )&&(frameLast>=0)) )
             {
                 if(!aniBiDirect)
                 {
-                    frameCurrent = ( ((frameLast==-1)? frameHeight : frameLast*frameSize)-frameSize);
-                    framePos.setY( ((frameLast==-1) ? frameHeight : frameLast*frameSize)-frameSize );
-                } else
+                     CurrentFrame = frameFirst;
+                    //frameCurrent = frameFirst * frameSize;
+                    //framePos.setY( frameFirst * frameSize );
+                }
+                else
                 {
-                frameCurrent += frameSize*frameStep*2;
-                framePos.setY( framePos.y() + frameSize*frameStep );
-                aniDirect=!aniDirect;
+                    CurrentFrame -= frameStep*2;
+                    aniDirect=!aniDirect;
+                    //framePos.setY( framePos.y() - frameSize*frameStep );
                 }
             }
-        else
-            framePos.setY( framePos.y() - frameSize*frameStep );
     }
+    else
+    {
+        //frameCurrent -= frameSize * frameStep;
+        CurrentFrame -= frameStep;
 
-    draw();
-    this->setPixmap(QPixmap(currentImage));
+        if ( CurrentFrame < frameFirst )
+            {
+                if(!aniBiDirect)
+                {
+                    CurrentFrame = ((frameLast==-1)? frames.size()-1 : frameLast);
+                    //frameCurrent = ( ((frameLast==-1)? frameHeight : frameLast*frameSize)-frameSize);
+                    //framePos.setY( ((frameLast==-1) ? frameHeight : frameLast*frameSize)-frameSize );
+                }
+                else
+                {
+                    CurrentFrame+=frameStep*2;
+                    aniDirect=!aniDirect;
+                    //frameCurrent += frameSize*frameStep*2;
+                    //framePos.setY( framePos.y() + frameSize*frameStep );
+                }
+            }
+    }
+    setFrame(CurrentFrame);
 }

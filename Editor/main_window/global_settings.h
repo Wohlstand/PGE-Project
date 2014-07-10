@@ -20,16 +20,42 @@
 #define GLOBAL_SETTINGS_H
 
 #include <QString>
+#include <QMdiArea>
+
+struct LevelEditingSettings
+{
+    bool animationEnabled;
+    bool collisionsEnabled;
+};
 
 class GlobalSettings
 {
 public:
+
+    static LevelEditingSettings LvlOpts;
+
     static QString locale;
     static long animatorItemsLimit;
 
     static QString savePath;
     static QString savePath_npctxt;
     static QString openPath;
+
+    static bool autoPlayMusic;
+
+    //Toolboxes visibly states
+    static bool LevelToolBoxVis;
+    static bool WorldToolBoxVis;
+    static bool SectionToolBoxVis;
+    static bool LevelDoorsBoxVis;
+    static bool LevelLayersBoxVis;
+    static bool LevelEventsBoxVis;
+    static bool LevelSearchBoxVis;
+
+    //Last active file type state
+    static int lastWinType;
+
+    static QMdiArea::ViewMode MainWindowView;
 
 };
 

@@ -51,6 +51,9 @@ LevelWater  LvlPlacingItems::waterSet=FileFormats::dummyLvlWater();
 int LvlPlacingItems::doorType=LvlPlacingItems::DOOR_Entrance;
 long LvlPlacingItems::doorArrayId = 0;
 
+int LvlPlacingItems::c_offset_x=0;
+int LvlPlacingItems::c_offset_y=0;
+
 int LvlPlacingItems::waterType=0; //0 - Water, 1 - QuickSand
 int LvlPlacingItems::playerID=0;
 
@@ -100,17 +103,9 @@ void LvlScene::setItemPlacer(int itemType, unsigned long itemID, int dType)
             if(found)
             {   //get neccesary element directly
                 WriteToLog(QtDebugMsg, QString("ItemPlacer -> Found by Index %1").arg(itemID));
-                if(index_blocks[itemID].type==1)
-                {
-                    isUser=true;
-                    noimage=false;
-                    tImg = uBlocks[index_blocks[itemID].i].image;
-                }
-                else
-                {
-                    tImg = pConfigs->main_block[index_blocks[itemID].i].image;
-                    noimage=false;
-                }
+                isUser=true;
+                noimage=false;
+                tImg = animates_Blocks[index_blocks[itemID].ai]->wholeImage();
             }
             else
             {
@@ -177,6 +172,8 @@ void LvlScene::setItemPlacer(int itemType, unsigned long itemID, int dType)
             if(pConfigs->main_block[j].sizable) cursor->setData(3, "sizable");
             cursor->setData(9, QString::number(LvlPlacingItems::blockSet.w));
             cursor->setData(10, QString::number(LvlPlacingItems::blockSet.h));
+            LvlPlacingItems::c_offset_x= qRound(qreal(LvlPlacingItems::blockSet.w) / 2);
+            LvlPlacingItems::c_offset_y= qRound(qreal(LvlPlacingItems::blockSet.h) / 2);
             cursor->setData(25, "CURSOR");
             cursor->setZValue(7000);
             cursor->setOpacity( 0.8 );
@@ -200,25 +197,17 @@ void LvlScene::setItemPlacer(int itemType, unsigned long itemID, int dType)
 
             if(j<pConfigs->main_bgo.size())
             {
-            if(pConfigs->main_bgo[j].id == itemID)
-                found=true;
+                if(pConfigs->main_bgo[j].id == itemID)
+                    found=true;
             }
         }
 
         //if Index found
         if(found)
         {   //get neccesary element directly
-            if(index_bgo[itemID].type==1)
-            {
-                isUser=true;
-                noimage=false;
-                tImg = uBGOs[index_bgo[itemID].i].image;
-            }
-            else
-            {
-                tImg = pConfigs->main_bgo[index_bgo[itemID].i].image;
-                noimage=false;
-            }
+            isUser=true;
+            noimage=false;
+            tImg = animates_BGO[index_bgo[itemID].ai]->wholeImage();
         }
         else
         {
@@ -275,6 +264,8 @@ void LvlScene::setItemPlacer(int itemType, unsigned long itemID, int dType)
         cursor->setData(1, QString::number(itemID));
         cursor->setData(9, QString::number(w));
         cursor->setData(10, QString::number(h));
+        LvlPlacingItems::c_offset_x= qRound(qreal(w) / 2);
+        LvlPlacingItems::c_offset_y= qRound(qreal(h) / 2);
         cursor->setData(25, "CURSOR");
         cursor->setZValue(7000);
         cursor->setOpacity( 0.8 );
@@ -385,6 +376,8 @@ void LvlScene::setItemPlacer(int itemType, unsigned long itemID, int dType)
         cursor->setData(8, QString::number((int)mergedSet.no_npc_collions));
         cursor->setData(9, QString::number(mergedSet.width));
         cursor->setData(10, QString::number(mergedSet.height));
+        LvlPlacingItems::c_offset_x= qRound(qreal(mergedSet.width) / 2);
+        LvlPlacingItems::c_offset_y= qRound(qreal(mergedSet.height) / 2);
         cursor->setData(25, "CURSOR");
         cursor->setZValue(7000);
         cursor->setOpacity( 0.8 );

@@ -125,12 +125,21 @@ public slots:
     void DragAndDroppedLayer(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent, int destinationRow);
     void DragAndDroppedEvent(QModelIndex sourceParent, int sourceStart, int sourceEnd, QModelIndex destinationParent, int destinationRow);
 
+    //for search
+    void toggleNewWindow(QMdiSubWindow *window);
+    void resetAllSearches();
+    void resetBlockSearch();
+    void resetBGOSearch();
+    void resetNPCSearch();
+
     //SubWindow functions
     npcedit *createNPCChild();
     leveledit *createLvlChild();
     void setActiveSubWindow(QWidget *window);
     void SWCascade();
     void SWTile();
+    void setSubView();
+    void setTabView();
 
 
     //LevelEdit functions
@@ -152,7 +161,6 @@ public slots:
 
     //Toolbox functions
     void updateFilters();
-    void updateFilter(QLineEdit *searchEdit, QListWidget *itemList, QComboBox *typeBox);
     void clearFilter();
 
     //LvlDoorProps Functions
@@ -184,11 +192,11 @@ public slots:
     void on_actionReset_position_triggered();
     void on_actionGridEn_triggered(bool checked);
     void on_LVLPropsBackImage_currentIndexChanged(int index);
+
     void on_actionReload_triggered();
+    void on_actionRefresh_menu_and_toolboxes_triggered();
 
 private slots:
-
-    //void TickTack();
 
     //Actions
     void on_LevelSectionSettings_visibilityChanged(bool visible);
@@ -375,6 +383,8 @@ private slots:
     void on_PROPS_NPCSpecialSpin_valueChanged(int arg1);
     void on_PROPS_NPCContaiter_clicked();
     void on_PROPS_NPCSpecialBox_currentIndexChanged(int index);
+    void on_PROPS_NPCSpecial2Spin_valueChanged(int arg1);
+    void on_PROPS_NPCSpecial2Box_currentIndexChanged(int index);
     void on_PROPS_NpcGenerator_clicked(bool checked);
     void on_PROPS_NPCGenType_currentIndexChanged(int index);
     void on_PROPS_NPCGenTime_valueChanged(double arg1);
@@ -396,7 +406,7 @@ private slots:
     //Level Events
     void on_actionLevelEvents_triggered(bool checked);
     void on_LevelEventsToolBox_visibilityChanged(bool visible);
-
+    void refreshSecondSpecialOption(long npcID, long spcOpts, long spcOpts2, bool newItem=false);
 
 
     void on_LVLEvents_List_itemSelectionChanged();
@@ -469,35 +479,33 @@ private slots:
     void on_LVLEvent_TriggerDelay_valueChanged(double arg1);
 
     void on_WarpBrowseLevels_clicked();
-
     void on_actionContents_triggered();
-
     void on_actionNew_triggered();
+    void on_actionLVLSearchBox_triggered(bool checked);
+
+    void on_FindDock_visibilityChanged(bool visible);
+    void on_FindStartNPC_clicked();
+    void on_Find_Button_TypeBlock_clicked();
+    void on_Find_Button_TypeBGO_clicked();
+    void on_Find_Button_TypeNPC_clicked();
+    void on_Find_Button_ResetBlock_clicked();
+    void on_Find_Button_ResetBGO_clicked();
+    void on_Find_Button_ResetNPC_clicked();
+    void on_FindStartBlock_clicked();
+    void on_FindStartBGO_clicked();
+    void on_Find_Button_ContainsNPCBlock_clicked();
 
 private:
 
-    LevelEditingSettings LvlOpts;
-    bool AnimationEnabled; //Animator switch
-
     LevelData LvlBuffer; // The Clipboarc for Level objects
 
-    QString LastOpenDir;
-    int lastWinType;
-    bool LevelToolBoxVis; //Level toolbox
-    bool SectionToolBoxVis; //Section Settings
-    bool LevelDoorsBoxVis; //Doors box
-    bool LevelLayersBoxVis; //Layers box
-    bool LevelEventsBoxVis; //Events box
-    bool WorldToolBoxVis;
-    bool autoPlayMusic;
-
-
-    // ////////////Layer Functions///////////////////
+     // ////////////Layer Functions///////////////////
     void RemoveCurrentLayer(bool moveToDefault);
     void RemoveLayerItems(QString layerName);
     void RemoveLayerFromListAndData(QListWidgetItem * layerItem);
     void ModifyLayer(QString layerName, bool visible);
     void ModifyLayer(QString layerName, QString newLayerName, bool visible, int historyRecord = -1);
+
     //Direct List Functions
     void AddNewLayer(QString layerName, bool setEdited);
     void ModifyLayerItem(QListWidgetItem *item, QString oldLayerName, QString newLayerName, bool visible);
@@ -510,6 +518,21 @@ private:
     void RemoveEvent(QString eventName);
     // //////////////////////////////////////////////
 
+    // /////////////Search Box///////////////////////
+    enum currentSearch{
+        SEARCH_BLOCK = 1 << 0,
+        SEARCH_BGO = 1 << 1,
+        SEARCH_NPC = 1 << 2
+    };
+    int currentSearches;
+    LevelBlock curSearchBlock;
+    LevelBGO curSearchBGO;
+    LevelNPC curSearchNPC;
+    void resetAllSearchFields();
+    bool doSearchBlock(leveledit* edit);
+    bool doSearchBGO(leveledit* edit);
+    bool doSearchNPC(leveledit* edit);
+    // //////////////////////////////////////////////
     QMediaPlayer * MusicPlayer;
 
     QMdiSubWindow *findMdiChild(const QString &fileName);

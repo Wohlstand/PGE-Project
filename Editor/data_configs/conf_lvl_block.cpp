@@ -23,7 +23,7 @@
 
 static QString Temp01="";
 
-void dataconfigs::loadLevelBlocks()
+void dataconfigs::loadLevelBlocks(QProgressDialog *prgs)
 {
     unsigned int i;
 
@@ -49,6 +49,9 @@ void dataconfigs::loadLevelBlocks()
         total_data +=block_total;
     blockset.endGroup();
 
+    if(prgs) prgs->setMaximum(block_total);
+    if(prgs) prgs->setLabelText(QApplication::tr("Loading Blocks..."));
+
     ConfStatus::total_blocks = block_total;
 
     //creation of empty indexes of arrayElements
@@ -70,6 +73,12 @@ void dataconfigs::loadLevelBlocks()
 
         for(i=1; i<=block_total; i++)
         {
+            qApp->processEvents();
+            if(prgs)
+            {
+                if(!prgs->wasCanceled()) prgs->setValue(i);
+            }
+
             blockset.beginGroup( QString("block-%1").arg(i) );
 
                 sblock.name = blockset.value("name", QString("block %1").arg(i) ).toString();
@@ -159,7 +168,9 @@ void dataconfigs::loadLevelBlocks()
                 sblock.onhit_block= blockset.value("onhit-block", "2").toInt();
                 sblock.algorithm= blockset.value("algorithm", "2").toInt();
                 sblock.view = (int)(blockset.value("view", "background").toString()=="foreground");
-                sblock.animated = (blockset.value("animated", "0").toString()=="1");
+                sblock.animated = blockset.value("animated", "0").toBool();
+                sblock.animation_rev = blockset.value("animation-reverse", "0").toBool(); //Reverse animation
+                sblock.animation_bid = blockset.value("animation-bidirectional", "0").toBool(); //Bidirectional animation
                 sblock.frames = blockset.value("frames", "1").toInt();
                 sblock.framespeed = blockset.value("framespeed", "125").toInt();
                 sblock.id = i;

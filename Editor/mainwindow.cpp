@@ -33,6 +33,8 @@ MainWindow::MainWindow(QMdiArea *parent) :
     QPixmap splashimg(":/images/splash_editor.png");
     QSplashScreen splash(splashimg);
     splash.setCursor(Qt::ArrowCursor);
+    splash.setDisabled(true);
+    splash.setWindowFlags( splash.windowFlags() |  Qt::WindowStaysOnTopHint );
     splash.show();
 
     if(!configs.loadconfigs())
@@ -69,8 +71,11 @@ MainWindow::~MainWindow()
 //Exit from application
 void MainWindow::on_Exit_triggered()
 {
-    MainWindow::close();
-    exit(0);
+    //ui->centralWidget->closeAllSubWindows();
+    if(!MainWindow::close())
+        return;
+    qApp->quit();
+    //exit(0);
 }
 
 //Open About box
@@ -127,4 +132,10 @@ void MainWindow::on_actionContents_triggered()
 void MainWindow::on_actionNew_triggered()
 {
     ui->menuNew->exec( this->cursor().pos() );
+}
+
+
+void MainWindow::on_actionRefresh_menu_and_toolboxes_triggered()
+{
+    updateMenus(true);
 }

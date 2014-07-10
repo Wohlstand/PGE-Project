@@ -31,6 +31,10 @@
 	<p style="text-align: left">
 	<a href="#Do_the_graphics_use_the_same_format_as_SMBX">Do the graphics use the same format as SMBX?</a></p>
 	</li>
+	<li>
+	<p style="text-align: left">
+	<a href="#Is_this_a_new_version_of_SMBX">Is this a new version of SMBX?</a></p>
+	</li>
 </ul>
 <p style="text-align: left">&nbsp;</p>
 <p><strong>Q: <a name="level_settings">Where is a "Level Settings"?</a></strong></p>
@@ -46,7 +50,12 @@ Open in menubar [Tools -&gt; Application Settings], and set option [Autoplay mus
 after opening file], and music will automatically play on each file open. If 
 music even after this doesn't play again, please, check the <span style="text-decoration: underline">data/music</span> directory, it must be 
 contain the SMBX's musics. If folder isn't exist, please, copy your music folder 
-from SMBX, or download music pack from our site.<br />
+from SMBX, or download music pack from our site.</p>
+<p>(on Microsoft Windows) If music stell don't playing, try to add new system 
+variable:</p>
+<p style="text-decoration: underline">QT_PLUGIN_PATH</p>
+<p>and set its value equal to <span style="text-decoration: underline">full path 
+of your pge_editor's directory</span> ( For example: C:\Games\SMBX\Pge_Editor\ ) <br />
 <br />
 </p>
 <p><strong>Q: <a name="I_cant_find_auto-align_option!">I can't find "auto-align" 
@@ -77,7 +86,14 @@ SMBX64 standard:<br />
 &nbsp;- Playable character sprite have a 10x10 frame table, whole image size in 
 1000x1000px and fixed by position physical boxes.<br />
 &nbsp;- All SMBX's custom graphics fully compatible with engine.<br />
-<br />
+</p>
+<p>&nbsp;</p>
+<p><strong>Q:</strong> <a name="Is_this_a_new_version_of_SMBX"><strong>Is this a new version of SMBX?</strong></a></p>
+<p><strong>A:</strong>
+This project is offered as a successor of SMBX. It is not SMBX, but fully compatible with it.<br />
+See: SMBX - is a game, PGE - is a game engine. All games are created based on their own game engines.<br />
+SMBX - closed sources, PGE - Libre and Open Source.<br />
+This project can be used not only for Mario games based on SMBX, but for others too (while being entirely open source). Because it allows full flexibility and customizing (all items are defined by INI files), and NPCs will be allowed to be programmed by a script language, this allows one to create any own NPCs of their own without closing algorithms to a specific NPC-ID.<br />
 </p>
 <p>&nbsp;</p>
 <p style="text-align: left">&nbsp;</p>

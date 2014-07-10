@@ -19,6 +19,7 @@
 #include "ui_mainwindow.h"
 #include "../mainwindow.h"
 
+#include "global_settings.h"
 
 
 void MainWindow::updateMenus(bool force)
@@ -43,9 +44,10 @@ void MainWindow::updateMenus(bool force)
     ui->actionHandScroll->setEnabled( (WinType==1) || (WinType==3));
     ui->actionReload->setEnabled( (WinType==1) || (WinType==3));
 
-    if(!(WinType==3)) WorldToolBoxVis = ui->WorldToolBox->isVisible(); //Save current visible status
+    if(!(WinType==3)) GlobalSettings::WorldToolBoxVis = ui->WorldToolBox->isVisible(); //Save current visible status
+    ui->WorldToolBox->setVisible( (WinType==3) && (GlobalSettings::WorldToolBoxVis)); //Restore saved visible status
 
-    ui->WorldToolBox->setVisible( (WinType==3) && (WorldToolBoxVis)); //Restore saved visible status
+
     ui->menuWorld->setEnabled(( WinType==3) );
     ui->actionWLDToolBox->setVisible( (WinType==3));
 
@@ -58,31 +60,35 @@ void MainWindow::updateMenus(bool force)
 
 
 
-    if((!(WinType==1))&& (lastWinType == 1) )
+    if((!(WinType==1))&& (GlobalSettings::lastWinType == 1) )
     {
-        LevelToolBoxVis = ui->LevelToolBox->isVisible();  //Save current visible status
-        SectionToolBoxVis = ui->LevelSectionSettings->isVisible();
+        GlobalSettings::LevelToolBoxVis = ui->LevelToolBox->isVisible();  //Save current visible status
+        GlobalSettings::SectionToolBoxVis = ui->LevelSectionSettings->isVisible();
 
-        LevelDoorsBoxVis = ui->DoorsToolbox->isVisible();
-        LevelLayersBoxVis = ui->LevelLayers->isVisible();
-        LevelEventsBoxVis = ui->LevelEventsToolBox->isVisible();
+        GlobalSettings::LevelDoorsBoxVis = ui->DoorsToolbox->isVisible();
+        GlobalSettings::LevelLayersBoxVis = ui->LevelLayers->isVisible();
+        GlobalSettings::LevelEventsBoxVis = ui->LevelEventsToolBox->isVisible();
+
+        GlobalSettings::LevelSearchBoxVis = ui->FindDock->isVisible();
 
         ui->LevelToolBox->setVisible( 0 ); //Hide level toolbars
         ui->LevelSectionSettings->setVisible( 0 );
         ui->DoorsToolbox->setVisible( 0 );
         ui->LevelLayers->setVisible( 0 );
         ui->LevelEventsToolBox->setVisible( 0 );
+        ui->FindDock->setVisible( 0 );
     }
 
-    if((lastWinType !=1) && (WinType==1))
+    if((GlobalSettings::lastWinType !=1) && (WinType==1))
     {
-        ui->LevelToolBox->setVisible( LevelToolBoxVis ); //Restore saved visible status
-        ui->LevelSectionSettings->setVisible( SectionToolBoxVis );
-        ui->DoorsToolbox->setVisible( LevelDoorsBoxVis );
-        ui->LevelLayers->setVisible( LevelLayersBoxVis );
-        ui->LevelEventsToolBox->setVisible( LevelEventsBoxVis );
+        ui->LevelToolBox->setVisible( GlobalSettings::LevelToolBoxVis ); //Restore saved visible status
+        ui->LevelSectionSettings->setVisible( GlobalSettings::SectionToolBoxVis );
+        ui->DoorsToolbox->setVisible( GlobalSettings::LevelDoorsBoxVis );
+        ui->LevelLayers->setVisible( GlobalSettings::LevelLayersBoxVis );
+        ui->LevelEventsToolBox->setVisible( GlobalSettings::LevelEventsBoxVis );
+        ui->FindDock->setVisible(GlobalSettings::LevelSearchBoxVis);
     }
-    lastWinType =   WinType;
+    GlobalSettings::lastWinType =   WinType;
 
     ui->actionLVLToolBox->setVisible( (WinType==1) );
     ui->actionWarpsAndDoors->setVisible( (WinType==1) );
@@ -90,6 +96,7 @@ void MainWindow::updateMenus(bool force)
     ui->actionLevelProp->setEnabled( (WinType==1) );
     ui->actionLevelEvents->setEnabled( (WinType==1) );
     ui->actionWarpsAndDoors->setVisible( (WinType==1) );
+    ui->actionLVLSearchBox->setVisible( (WinType==1) );
 
     ui->menuLevel->setEnabled( (WinType==1) );
 
@@ -177,15 +184,15 @@ void MainWindow::updateMenus(bool force)
             ui->actionLockWaters->setChecked(activeLvlEditWin()->scene->lock_water);
             ui->actionLockDoors->setChecked(activeLvlEditWin()->scene->lock_door);
 
-            LvlOpts.animationEnabled = activeLvlEditWin()->scene->opts.animationEnabled;
-            LvlOpts.collisionsEnabled = activeLvlEditWin()->scene->opts.collisionsEnabled;
+            GlobalSettings::LvlOpts.animationEnabled = activeLvlEditWin()->scene->opts.animationEnabled;
+            GlobalSettings::LvlOpts.collisionsEnabled = activeLvlEditWin()->scene->opts.collisionsEnabled;
             ui->actionUndo->setEnabled(activeLvlEditWin()->scene->canUndo());
             ui->actionRedo->setEnabled(activeLvlEditWin()->scene->canRedo());
 
             UpdateCustomItems(); // Update custom item lists for Level
         }
-        ui->actionAnimation->setChecked( LvlOpts.animationEnabled );
-        ui->actionCollisions->setChecked( LvlOpts.collisionsEnabled );
+        ui->actionAnimation->setChecked( GlobalSettings::LvlOpts.animationEnabled );
+        ui->actionCollisions->setChecked( GlobalSettings::LvlOpts.collisionsEnabled );
     }
     else
     {
@@ -197,31 +204,74 @@ void MainWindow::updateMenus(bool force)
 }
 
 
+//QList<QMenu * > menu_delete_list;
+//QList<QAction * > action_delete_list;
+
 void MainWindow::updateWindowMenu()
 {
     //Window menu
     ui->menuWindow->clear();
+
+//    while(!action_delete_list.isEmpty())
+//    {
+//        QAction *tmp = action_delete_list.first();
+//        action_delete_list.pop_back();
+//        if(tmp!=NULL) {
+//            WriteToLog(QtDebugMsg, QString("->>>>Removed trash!<<<<-"));
+//            WriteToLog(QtDebugMsg, QString(tmp->text()));
+//            delete tmp;
+//        }
+//    }
+
+    QAction * SubView = ui->menuWindow->addAction(tr("Sub Windows"));
+    connect(SubView, SIGNAL(triggered()), this, SLOT(setSubView()));
+    SubView->setCheckable(true);
+    if(GlobalSettings::MainWindowView==QMdiArea::SubWindowView)
+        SubView->setChecked(true);
+
+    //action_delete_list.push_back(SubView);
+
+
+    QAction * TabView = ui->menuWindow->addAction(tr("Tab Windows"));
+    connect(TabView, SIGNAL(triggered()), this, SLOT(setTabView()));
+    TabView->setCheckable(true);
+    if(GlobalSettings::MainWindowView==QMdiArea::TabbedView)
+        TabView->setChecked(true);
+
+    //action_delete_list.push_back(TabView);
+
+    ui->menuWindow->addSeparator();
+    //action_delete_list.push_back(ui->menuWindow->addSeparator());
+
     QList<QMdiSubWindow *> windows = ui->centralWidget->subWindowList();
     QAction * closeC = ui->menuWindow->addAction(tr("Close current"));
         connect(closeC, SIGNAL(triggered()), this, SLOT( on_actionClose_triggered() ) );
         closeC->setEnabled( !windows.isEmpty() );
 
+    //action_delete_list.push_back(closeC);
+
+
     ui->menuWindow->addSeparator();
+    //action_delete_list.push_back(ui->menuWindow->addSeparator());
 
     QAction * cascade = ui->menuWindow->addAction(tr("Cascade"));
         connect(cascade, SIGNAL(triggered()), this, SLOT( SWCascade() ) );
         cascade->setEnabled( !windows.isEmpty() );
+    //action_delete_list.push_back(cascade);
 
     QAction * tiledW = ui->menuWindow->addAction(tr("Tiled"));
         connect(tiledW, SIGNAL(triggered()), this, SLOT( SWTile() ) );
         tiledW->setEnabled( !windows.isEmpty() );
+    //action_delete_list.push_back(tiledW);
 
     ui->menuWindow->addSeparator();
+    //action_delete_list.push_back(ui->menuWindow->addSeparator());
 
     QAction * empty = ui->menuWindow->addAction( tr("[No files open]") );
         empty->setDisabled(1);
 
         empty->setVisible( windows.isEmpty() );
+    //action_delete_list.push_back(empty);
 
 
     for (int i = 0; i < windows.size(); ++i) {
@@ -234,6 +284,7 @@ void MainWindow::updateWindowMenu()
         QAction *action  = ui->menuWindow->addAction(text);
         action->setCheckable(true);
         action->setChecked( windows[i] == ui->centralWidget->activeSubWindow() );
+        //action_delete_list.push_back(action);
 
         connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
         windowMapper->setMapping(action, windows.at(i));

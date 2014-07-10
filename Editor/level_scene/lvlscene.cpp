@@ -25,7 +25,7 @@
 
 LvlScene::LvlScene(dataconfigs &configs, LevelData &FileData, QObject *parent) : QGraphicsScene(parent)
 {
-    setItemIndexMethod(NoIndex);
+    setItemIndexMethod(QGraphicsScene::NoIndex);
 
     //Pointerss
     pConfigs = &configs; // Pointer to Main Configs
@@ -69,6 +69,7 @@ LvlScene::LvlScene(dataconfigs &configs, LevelData &FileData, QObject *parent) :
     */
     cursor = NULL;
     resetCursor();
+
 
     //set dummy images if target not exist or wrong
     uBlockImg = QPixmap(QApplication::applicationDirPath() + "/" + "data/unknown_block.gif");
