@@ -33,7 +33,6 @@ before_install:
 - brew install qt5
 - brew install coreutils
 - brew install binutils
-- brew install diffutils
 - brew install gnu-sed
 #- sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
 #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
