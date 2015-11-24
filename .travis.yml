@@ -31,6 +31,10 @@ before_install:
 #- cd ..
 - printf "===============================================\n\n"
 - brew install qt5
+- brew install coreutils
+- brew install binutils
+- brew install diffutils
+- brew install gnu-sed
 #- sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
 #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
 #- echo "deb http://ppa.launchpad.net/ubuntu-sdk-team/ppa/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list
@@ -47,8 +51,12 @@ before_install:
 #- printf "===============================================\n\n"
 
 #- brew install qt5
-- chmod u+x generate_paths_travis.sh
-- bash generate_paths_travis.sh
+#- chmod u+x generate_paths_travis.sh
+- echo "QMake=\"qmake\"" > _paths.sh
+- echo "LRelease=\"lrelease\"" >> _paths.sh
+- echo "" >> _paths.sh
+- chmod u+x _paths.sh
+#- bash generate_paths_travis.sh
 - sudo bash build_deps.sh no-pause
 - sudo chown -R travis:travis _Libs/_builds/macos
 - sudo chown -R travis:travis bin
