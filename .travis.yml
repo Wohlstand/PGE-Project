@@ -62,3 +62,7 @@ before_install:
 install: true
 script:
 - bash build.sh no-pause
+- cd _Misc/dev_scripts/deploy
+- bash deploy_osx.sh nopause
+- cd ../../..
+
