@@ -49,7 +49,9 @@ before_install:
 #- brew install qt5
 - chmod u+x generate_paths_travis.sh
 - bash generate_paths_travis.sh
-- bash build_deps.sh no-pause
+- sudo bash build_deps.sh no-pause
+- sudo chown -R travis:travis _Libs/_builds/macos
+- sudo chown -R travis:travis bin
 install: true
 script:
 - bash build.sh no-pause
