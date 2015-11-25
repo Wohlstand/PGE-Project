@@ -11,13 +11,17 @@ compiler:
 env:
 # Default build. Release.
 #- PATH=/home/travis/Qt/Qt-5.4_static/bin:/home/travis/Qt/Qt-5.4_static/lib:$PATH
+- PATH=/Users/vit9696/Qt/Qt-5.4_static/bin:/Users/vit9696/Qt/Qt-5.4_static/lib:$PATH
 before_install:
 #- mkdir /home/travis/Qt
-#- wget https://www.dropbox.com/s/n6qkqd4g1zx9zbo/qt-5.4.1-static-linux-mint.tar.gz?dl=0 -O /home/travis/Qt/qt-5.4.1-static-linux-mint.tar.gz
-#- Bak=~+
-#- cd /home/travis/Qt
+#- wget https://www.dropbox.com/s/n6qkqd4g1zx9zbo/qt-5.4.1-static-linux-mint.tar.gz?dl=1 -O /home/travis/Qt/qt-5.4.1-static-linux-mint.tar.gz
+- sudo mkdir /Users/vitaly/Qt
+- wget https://www.dropbox.com/s/adauisccz4ou92e/qt-5.4.1-static-osx.tar.gz?dl=1 -O /Users/vit9696/Qt/qt-5.4.1-static-osx.tar.gz
+- Bak=~+
+- cd /Users/vit9696/Qt
 #- tar -xvf qt-5.4.1-static-linux-mint.tar.gz
-#- cd $Bak
+- tar -xvf qt-5.4.1-static-osx.tar.gz
+- cd $Bak
 #- printf "===============================================\n"
 #- echo "Installed automake"
 #- printf "===============================================\n"
@@ -30,7 +34,7 @@ before_install:
 #- sudo make install
 #- cd ..
 - printf "===============================================\n\n"
-- brew install qt5
+#- brew install qt5
 - brew install coreutils
 - brew install binutils
 - brew install gnu-sed
