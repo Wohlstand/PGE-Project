@@ -15,7 +15,7 @@ env:
 before_install:
 #- mkdir /home/travis/Qt
 #- wget https://www.dropbox.com/s/n6qkqd4g1zx9zbo/qt-5.4.1-static-linux-mint.tar.gz?dl=1 -O /home/travis/Qt/qt-5.4.1-static-linux-mint.tar.gz
-- sudo mkdir /Users/vitaly/Qt
+- sudo mkdir -p /Users/vit9696/Qt
 - wget https://www.dropbox.com/s/adauisccz4ou92e/qt-5.4.1-static-osx.tar.gz?dl=1 -O /Users/vit9696/Qt/qt-5.4.1-static-osx.tar.gz
 - Bak=~+
 - cd /Users/vit9696/Qt
