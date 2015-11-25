@@ -21,7 +21,7 @@ before_install:
 - Bak=~+
 - cd /Users/vit9696/Qt
 #- tar -xvf qt-5.4.1-static-linux-mint.tar.gz
-- tar -xvf qt-5.4.1-static-osx.tar.gz
+- tar -xf qt-5.4.1-static-osx.tar.gz
 - cd $Bak
 #- printf "===============================================\n"
 #- echo "Installed automake"
