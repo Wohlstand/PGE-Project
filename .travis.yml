@@ -39,6 +39,8 @@ before_install:
 - brew install coreutils
 - brew install binutils
 - brew install gnu-sed
+- PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+- MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 #- sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
 #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
 #- echo "deb http://ppa.launchpad.net/ubuntu-sdk-team/ppa/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list
