@@ -16,7 +16,7 @@ before_install:
 #- mkdir /home/travis/Qt
 #- wget https://www.dropbox.com/s/n6qkqd4g1zx9zbo/qt-5.4.1-static-linux-mint.tar.gz?dl=1 -O /home/travis/Qt/qt-5.4.1-static-linux-mint.tar.gz
 - sudo mkdir -p /Users/vit9696/Qt
-- sudo chown -R travis:travis /Users/vit9696
+- sudo chown -R travis /Users/vit9696
 - wget https://www.dropbox.com/s/adauisccz4ou92e/qt-5.4.1-static-osx.tar.gz?dl=1 -O /Users/vit9696/Qt/qt-5.4.1-static-osx.tar.gz
 - Bak=~+
 - cd /Users/vit9696/Qt
@@ -62,8 +62,8 @@ before_install:
 - chmod u+x _paths.sh
 #- bash generate_paths_travis.sh
 - sudo bash build_deps.sh no-pause
-- sudo chown -R travis:travis _Libs/_builds/macos
-- sudo chown -R travis:travis bin
+- sudo chown -R travis _Libs/_builds/macos
+- sudo chown -R travis bin
 install: true
 script:
 - bash build.sh no-pause
