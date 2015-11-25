@@ -61,9 +61,9 @@ before_install:
 - echo "" >> _paths.sh
 - chmod u+x _paths.sh
 #- bash generate_paths_travis.sh
-- sudo bash build_deps.sh no-pause
-- sudo chown -R travis _Libs/_builds/macos
-- sudo chown -R travis bin
+- bash build_deps.sh no-pause
+#- sudo chown -R travis _Libs/_builds/macos
+#- sudo chown -R travis bin
 install: true
 script:
 - bash build.sh no-pause
