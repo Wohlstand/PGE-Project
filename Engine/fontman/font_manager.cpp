@@ -30,16 +30,10 @@
 #include <QPainter>
 #include <QFontMetrics>
 #include <QFontDatabase>
-#include <QGLWidget>
 #include <QFileInfo>
 #include <QDir>
 
 #include <common_features/graphics_funcs.h>
-
-#include <SDL2/SDL.h>
-#undef main
-
-
 
 RasterFont::RasterFont() : first_line_only("\n.*")
 {
@@ -307,6 +301,17 @@ void RasterFont::printText(QString text, int x, int y, float Red, float Green, f
     int offsetY=0;
     GLint w=letter_width;
     GLint h=letter_height;
+
+    glEnable(GL_TEXTURE_2D);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    #ifdef GL_GLEXT_PROTOTYPES
+    glBlendEquation(GL_FUNC_ADD);
+    #endif
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
     foreach(QChar cx, text)
     {
         switch(cx.toLatin1())
@@ -326,7 +331,6 @@ void RasterFont::printText(QString text, int x, int y, float Red, float Green, f
         RasChar rch=fontMap[cx];
         if(rch.valid)
         {
-            glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, rch.tx);
             PGE_PointF point;
                 point = GlRenderer::MapToGl(x+offsetX-rch.padding_left, y+offsetY);
@@ -337,17 +341,26 @@ void RasterFont::printText(QString text, int x, int y, float Red, float Green, f
             float bottom = point.y();
 
             glColor4f( Red, Green, Blue, Alpha);
-            glBegin(GL_TRIANGLES);
-                glTexCoord2f(rch.l,rch.t);glVertex3f(left, top, 0.0);
-                glTexCoord2f(rch.r,rch.t);glVertex3f(right, top, 0.0);
-                glTexCoord2f(rch.r,rch.b);glVertex3f(right, bottom, 0.0);
+            GLfloat Vertices[] = {
+                left, top, 0,
+                right, top, 0,
+                right, bottom, 0,
+                left, bottom, 0
+            };
+            GLfloat TexCoord[] = {
+                rch.l, rch.t,
+                rch.r, rch.t,
+                rch.r, rch.b,
+                rch.l, rch.b
+            };
+            GLubyte indices[] = {
+                0, 1, 2, // (bottom left - top left - top right)
+                0, 2, 3  // (bottom left - top right - bottom right)
+            };
+            glVertexPointer(3, GL_FLOAT, 0, Vertices);
+            glTexCoordPointer(2, GL_FLOAT, 0, TexCoord);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
 
-                glTexCoord2f(rch.l,rch.t);glVertex3f(left, top, 0.0);
-                glTexCoord2f(rch.l,rch.b);glVertex3f(left, bottom, 0.0) ;
-                glTexCoord2f(rch.r,rch.b);glVertex3f(right, bottom, 0.0);
-            glEnd();
-
-            glDisable(GL_TEXTURE_2D);
             offsetX+=w-rch.padding_left-rch.padding_right+interletter_space;
         }
         else
@@ -355,7 +368,6 @@ void RasterFont::printText(QString text, int x, int y, float Red, float Green, f
             GLuint charTex;
             charTex = ttf_borders ? FontManager::getChar2(cx) : FontManager::getChar1(cx);
 
-            glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, charTex);
             PGE_PointF point;
                 point = GlRenderer::MapToGl(x+offsetX, y+offsetY);
@@ -366,20 +378,33 @@ void RasterFont::printText(QString text, int x, int y, float Red, float Green, f
             float bottom = point.y();
 
             glColor4f( Red, Green, Blue, Alpha);
-            glBegin(GL_TRIANGLES);
-                glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-                glTexCoord2f(1.0,1.0);glVertex3f(right, top, 0.0);
-                glTexCoord2f(0.0,0.0);glVertex3f(right, bottom, 0.0);
+            GLfloat Vertices[] = {
+                left, top, 0,
+                right, top, 0,
+                right, bottom, 0,
+                left, bottom, 0
+            };
+            GLfloat TexCoord[] = {
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f,
+                0.0f, 1.0f
+            };
+            GLubyte indices[] = {
+                0, 1, 2, // (bottom left - top left - top right)
+                0, 2, 3  // (bottom left - top right - bottom right)
+            };
+            glVertexPointer(3, GL_FLOAT, 0, Vertices);
+            glTexCoordPointer(2, GL_FLOAT, 0, TexCoord);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
 
-                glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-                glTexCoord2f(0.0,0.0);glVertex3f(left, bottom, 0.0) ;
-                glTexCoord2f(1.0,0.0);glVertex3f(right, bottom, 0.0);
-            glEnd();
-
-            glDisable(GL_TEXTURE_2D);
             offsetX+=w+interletter_space;
         }
     }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_TEXTURE_2D);
 }
 
 bool RasterFont::isLoaded()
@@ -623,6 +648,17 @@ void FontManager::printText(QString text, int x, int y, int font, float Red, flo
         int offsetY=0;
         int height=32;
         int width=32;
+
+        glEnable(GL_TEXTURE_2D);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        #ifdef GL_GLEXT_PROTOTYPES
+        glBlendEquation(GL_FUNC_ADD);
+        #endif
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
         foreach(QChar cx, text)
         {
             switch(cx.toLatin1())
@@ -641,9 +677,8 @@ void FontManager::printText(QString text, int x, int y, int font, float Red, flo
 
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, charTex);
-            glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-            glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
-
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WIDTH, &w);
+            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_HEIGHT, &h);
 
             PGE_PointF point;
                 point = GlRenderer::MapToGl(x+offsetX, y+offsetY);
@@ -654,21 +689,34 @@ void FontManager::printText(QString text, int x, int y, int font, float Red, flo
             float bottom = point.y();
 
             glColor4f(Red, Green, Blue, Alpha);
-            glBegin(GL_TRIANGLES);
-                glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-                glTexCoord2f(1.0,1.0);glVertex3f(right, top, 0.0);
-                glTexCoord2f(1.0,0.0);glVertex3f(right, bottom, 0.0);
+            GLfloat Vertices[] = {
+                left, top, 0,
+                right, top, 0,
+                right, bottom, 0,
+                left, bottom, 0
+            };
+            GLfloat TexCoord[] = {
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+                1.0f, 1.0f,
+                0.0f, 1.0f
+            };
+            GLubyte indices[] = {
+                0, 1, 2, // (bottom left - top left - top right)
+                0, 2, 3  // (bottom left - top right - bottom right)
+            };
+            glVertexPointer(3, GL_FLOAT, 0, Vertices);
+            glTexCoordPointer(2, GL_FLOAT, 0, TexCoord);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
 
-                glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-                glTexCoord2f(0.0,0.0);glVertex3f(left, bottom, 0.0) ;
-                glTexCoord2f(1.0,0.0);glVertex3f(right, bottom, 0.0);
-            glEnd();
-
-            glDisable(GL_TEXTURE_2D);
             width=w;
             height=h;
             offsetX+=w;
         }
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
         return;
     }
     else {
@@ -731,7 +779,7 @@ GLuint FontManager::getChar1(QChar _x)
             text_image = text_image.scaled(text_image.width()*2, text_image.height()*2);
         }
 
-        text_image = QGLWidget::convertToGLFormat(text_image);//.mirrored(false, true);
+        text_image = GraphicsHelps::convertToGLFormat(text_image);//.mirrored(false, true);
 
         GLuint texture;
 
@@ -792,7 +840,7 @@ GLuint FontManager::getChar2(QChar _x)
             text_image = text_image.scaled(text_image.width()*2, text_image.height()*2);
         }
 
-        text_image = QGLWidget::convertToGLFormat(text_image);//.mirrored(false, true);
+        text_image = GraphicsHelps::convertToGLFormat(text_image);//.mirrored(false, true);
 
         GLuint texture;
 
@@ -873,7 +921,7 @@ void FontManager::SDL_string_texture_create(QFont &font, QRgb color, QString &te
         x.drawText(text_image.rect(), text);
     x.end();
 
-    text_image = QGLWidget::convertToGLFormat(text_image);//.mirrored(false, true);
+    text_image = GraphicsHelps::convertToGLFormat(text_image);//.mirrored(false, true);
 
     glGenTextures(1, texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -926,7 +974,7 @@ void FontManager::SDL_string_texture_create(QFont &font, PGE_Rect limitRect, int
         text_image = text_image.scaled(text_image.width()*2, text_image.height()*2);
     }
 
-    text_image = QGLWidget::convertToGLFormat(text_image);//.mirrored(false, true);
+    text_image = GraphicsHelps::convertToGLFormat(text_image);//.mirrored(false, true);
 
     glGenTextures(1, texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -951,8 +999,16 @@ void FontManager::SDL_string_render2D( GLuint x, GLuint y, GLuint *texture )
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, *texture);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
+    glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WIDTH, &w);
+    glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_HEIGHT,&h);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    #ifdef GL_GLEXT_PROTOTYPES
+    glBlendEquation(GL_FUNC_ADD);
+    #endif
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     PGE_PointF point;
         point = GlRenderer::MapToGl(x, y);
@@ -963,15 +1019,31 @@ void FontManager::SDL_string_render2D( GLuint x, GLuint y, GLuint *texture )
     float bottom = point.y();
 
     glColor4f( 1.f, 1.f, 1.f, 1.f);
-    glBegin(GL_TRIANGLES);
-        glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-        glTexCoord2f(1.0,1.0);glVertex3f(right, top, 0.0);
-        glTexCoord2f(1.0,0.0);glVertex3f(right, bottom, 0.0);
-        glTexCoord2f(0.0,1.0);glVertex3f(left, top, 0.0);
-        glTexCoord2f(0.0,0.0);glVertex3f(left, bottom, 0.0) ;
-        glTexCoord2f(1.0,0.0);glVertex3f(right, bottom, 0.0);        
-    glEnd();
 
+    GLfloat Vertices[] = {
+        left, top, 0,
+        right, top, 0,
+        right, bottom, 0,
+        left, bottom, 0
+    };
+    GLfloat TexCoord[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f
+    };
+    GLubyte indices[] = {
+        0, 1, 2, // (bottom left - top left - top right)
+        0, 2, 3  // (bottom left - top right - bottom right)
+    };
+    glVertexPointer(3, GL_FLOAT, 0, Vertices);
+    glTexCoordPointer(2, GL_FLOAT, 0, TexCoord);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
 }
 

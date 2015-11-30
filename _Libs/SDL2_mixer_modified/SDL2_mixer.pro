@@ -23,7 +23,7 @@ win32:{
     LIBS += -L../_builds/win32/lib
     LIBS += -lmingw32 -lSDL2main -mwindows
     INCLUDEPATH += ../_builds/win32/include
-    DEFINES -= USE_NATIVE_MIDI
+    DEFINES += USE_NATIVE_MIDI
 }
 linux-g++||unix:!macx:!android:{
     LIBS += -L../_builds/linux/lib
@@ -52,7 +52,7 @@ USE_TIMIDITY_MIDI USE_ADL_MIDI OGG_MUSIC FLAC_MUSIC MP3_MAD_MUSIC GME_MUSIC NO_O
 DEFINES += MODPLUG_MUSIC
 
 android: {
-DEFINES += HAVE_STRCASECMP HAVE_STRNCASECMP #OGG_USE_TREMOR
+DEFINES += HAVE_STRCASECMP HAVE_STRNCASECMP MID_MUSIC USE_ADL_MIDI GME_MUSIC NO_OLDNAMES SPC_MORE_ACCURACY #OGG_USE_TREMOR
 DEFINES -= FLAC_MUSIC #temopary with no FLAC, because I wasn't built it because compilation bug
 }
 
